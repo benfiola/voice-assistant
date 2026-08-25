@@ -1,0 +1,19 @@
+# METABEGIN
+# X-Env-Layer-Name: voice-assistant
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: project
+# X-Env-Layer-Desc: Voice Assistant customizations - clone repo and install dependencies
+# X-Env-Layer-Requires: debian-trixie-arm64-slim, rpi-debian-trixie, rpi-misc-skel, systemd-min, systemd-net-min, systemd-timesyncd
+# METAEND
+---
+mmdebstrap:
+  packages:
+    - git
+  customize-hooks:
+    - |
+      chroot $1 sh -c '
+        # Clone the voice-assistant repository
+        sudo -u assistant git clone https://github.com/benfiola/voice-assistant.git /home/assistant/voice-assistant
+        # Set proper ownership
+        chown -R assistant:assistant /home/pi/voice-assistant
+      '

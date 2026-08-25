@@ -1,0 +1,17 @@
+device:
+  layer: rpi4
+  hostname: ${HOSTNAME}
+  user1: assistant
+  user1pass: ${PASSWORD}
+  ssh_enabled: y
+
+wifi:
+  ssid: wifiwifiwifiwifi-iot
+  password: ${WIFI_PASSWORD}
+
+image:
+  name: voice-assistant
+  layer: image-rpios
+
+layer:
+  custom: voice-assistant
