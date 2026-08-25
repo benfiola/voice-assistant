@@ -3,7 +3,7 @@
 # X-Env-Layer-Version: 1.0.0
 # X-Env-Layer-Category: project
 # X-Env-Layer-Desc: Voice Assistant customizations - clone repo and install dependencies
-# X-Env-Layer-Requires: debian-trixie-arm64-slim, rpi-debian-trixie, rpi-misc-skel, systemd-min, systemd-net-min, systemd-timesyncd
+# X-Env-Layer-Requires: debian-trixie-arm64, rpi-debian-trixie, rpi-misc-skel, systemd-min, systemd-net-min, systemd-timesyncd, iwd, wireless-regulatory
 # METAEND
 ---
 mmdebstrap:
@@ -15,5 +15,13 @@ mmdebstrap:
         # Clone the voice-assistant repository
         sudo -u assistant git clone https://github.com/benfiola/voice-assistant.git /home/assistant/voice-assistant
         # Set proper ownership
-        chown -R assistant:assistant /home/pi/voice-assistant
+        chown -R assistant:assistant /home/assistant/voice-assistant
       '
+    - |
+      set -eu
+      profile="$1/var/lib/iwd/${IGconf_wifi_ssid}.psk"
+      cat <<-EOF > "$profile"
+      [Security]
+      Passphrase=${IGconf_wifi_password}
+      EOF
+      chmod 0600 "$profile"
