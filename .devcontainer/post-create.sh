@@ -18,7 +18,5 @@ if [ ! -d "$HOME/.local/share/rpi-image-gen" ]; then
   ./install_deps.sh
   cd -
 fi
-
-# Add rpi-image-gen to PATH
-export PATH="$HOME/.local/share/rpi-image-gen/bin:$PATH"
+export PATH="$HOME/.local/share/rpi-image-gen:$PATH"
 echo 'export PATH="$HOME/.local/share/rpi-image-gen:$PATH"' >> ~/.bashrc
