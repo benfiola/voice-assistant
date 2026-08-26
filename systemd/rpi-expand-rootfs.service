@@ -1,0 +1,15 @@
+[Unit]
+Description=Expand root filesystem to fill available space
+After=local-fs.target
+ConditionPathExists=!/home/assistant/.rpi-expanded
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/home/assistant/voice-assistant/rpi-expand-rootfs.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

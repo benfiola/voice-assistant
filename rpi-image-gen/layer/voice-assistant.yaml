@@ -3,12 +3,13 @@
 # X-Env-Layer-Version: 1.0.0
 # X-Env-Layer-Category: project
 # X-Env-Layer-Desc: Voice Assistant customizations - clone repo and install dependencies
-# X-Env-Layer-Requires: debian-trixie-arm64, rpi-debian-trixie, rpi-misc-skel, systemd-min, systemd-net-min, systemd-timesyncd, iwd, wireless-regulatory
+# X-Env-Layer-Requires: debian-trixie-arm64, iwd, openssh-server, rpi-debian-trixie, rpi-misc-skel, rpi-misc-utils, systemd-min, systemd-net-min, systemd-timesyncd, wireless-regulatory
 # METAEND
 ---
 mmdebstrap:
   packages:
     - git
+    - parted
   customize-hooks:
     # configure wifi
     - |

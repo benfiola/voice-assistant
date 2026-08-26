@@ -85,19 +85,25 @@ fi
 chown -R "$APP_USER:$APP_USER" "$REPO_DIR" "$VENV_DIR"
 
 # install/update system units
-units=""
+units_to_restart=""
 for unit in "$REPO_DIR"/systemd/*.service "$REPO_DIR"/systemd/*.timer; do
   [ -e "$unit" ] || continue
-  install -m 0644 "$unit" /etc/systemd/system/
-  systemctl enable "$(basename "$unit")"
-  units="$units $(basename "$unit")"
+  unit_name="$(basename "$unit")"
+  unit_dest="/etc/systemd/system/$unit_name"
+
+  # only restart if the unit file changed
+  if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
+    install -m 0644 "$unit" "$unit_dest"
+    case "$unit_name" in
+      *.service) units_to_restart="$units_to_restart $unit_name" ;;
+    esac
+  fi
+  systemctl enable "$unit_name"
 done
 
-if [ -n "$units" ] && [ -d /run/systemd/system ]; then
+if [ -n "$units_to_restart" ] && [ -d /run/systemd/system ]; then
   systemctl daemon-reload
-  for unit in $units; do
-    case "$unit" in
-      *.service) systemctl restart "$unit" ;;
-    esac
+  for unit in $units_to_restart; do
+    systemctl restart "$unit"
   done
 fi

@@ -3,7 +3,6 @@ device:
   hostname: ${HOSTNAME}
   user1: assistant
   user1pass: ${PASSWORD}
-  ssh_enabled: y
 
 wifi:
   ssid: wifiwifiwifiwifi-iot
@@ -12,8 +11,11 @@ wifi:
 image:
   name: voice-assistant
   layer: image-rpios
-  boot_part_size: 200%
-  root_part_size: 300%
+  boot_part_size: 512M
+  root_part_size: 2G
+
+ssh:
+  pubkey_only: n
 
 layer:
   custom: voice-assistant
