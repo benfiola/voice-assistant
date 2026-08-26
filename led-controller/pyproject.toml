@@ -1,0 +1,11 @@
+[project]
+name = "led-controller"
+version = "0.1.0"
+dependencies = ["websockets"]
+
+[build-system]
+requires = ["setuptools>=62.3"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []

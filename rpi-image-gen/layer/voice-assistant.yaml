@@ -10,13 +10,7 @@ mmdebstrap:
   packages:
     - git
   customize-hooks:
-    - |
-      chroot $1 sh -c '
-        # Clone the voice-assistant repository
-        sudo -u assistant git clone https://github.com/benfiola/voice-assistant.git /home/assistant/voice-assistant
-        # Set proper ownership
-        chown -R assistant:assistant /home/assistant/voice-assistant
-      '
+    # configure wifi
     - |
       set -eu
       profile="$1/var/lib/iwd/${IGconf_wifi_ssid}.psk"
@@ -25,3 +19,10 @@ mmdebstrap:
       Passphrase=${IGconf_wifi_password}
       EOF
       chmod 0600 "$profile"
+    # set up voice-assistant
+    - |
+      chroot $1 sh -c '
+        set -eu
+        git clone --recurse-submodules https://github.com/benfiola/voice-assistant.git /home/assistant/voice-assistant
+        /home/assistant/voice-assistant/bootstrap.sh
+      '

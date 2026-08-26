@@ -1,0 +1,23 @@
+[Unit]
+Description=linux-voice-assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=assistant
+WorkingDirectory=/home/assistant/voice-assistant/vendor/linux-voice-assistant
+Environment=PATH=/home/assistant/.venv/bin:/usr/bin:/bin
+Environment=PULSE_SERVER=/run/user/%U/pulse/native
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+Environment=PULSE_COOKIE=/home/assistant/tmp_pulse_cookie
+Environment=PREFERENCES_FILE=/home/assistant/preferences.json
+Environment=CLIENT_NAME=%H
+ExecStartPre=/home/assistant/.venv/bin/python3 /home/assistant/voice-assistant/vendor/respeaker-xvf3800/python_control/xvf_host.py REBOOT --values 1
+ExecStartPre=/bin/sleep 3
+ExecStart=/home/assistant/voice-assistant/vendor/linux-voice-assistant/docker-entrypoint.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

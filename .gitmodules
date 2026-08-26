@@ -1,0 +1,6 @@
+[submodule "vendor/linux-voice-assistant"]
+	path = vendor/linux-voice-assistant
+	url = https://github.com/OHF-Voice/linux-voice-assistant.git
+[submodule "vendor/respeaker-xvf3800"]
+	path = vendor/respeaker-xvf3800
+	url = https://github.com/respeaker/reSpeaker_XVF3800_USB_4MIC_ARRAY.git
