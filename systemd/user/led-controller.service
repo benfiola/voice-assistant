@@ -1,0 +1,13 @@
+[Unit]
+Description=linux-voice-assistant + XVF3800 LED Controller
+After=linux-voice-assistant.service
+Requires=linux-voice-assistant.service
+
+[Service]
+Type=simple
+ExecStart=/home/assistant/.venv/bin/python /home/assistant/voice-assistant/led-controller
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
