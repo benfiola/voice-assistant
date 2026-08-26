@@ -109,9 +109,12 @@ fi
 
 # install/update user units
 USER_CONFIG_DIR="/home/$APP_USER/.config/systemd/user"
-mkdir -p "$USER_CONFIG_DIR"
+WANTS_DIR="$USER_CONFIG_DIR/default.target.wants"
+mkdir -p "$WANTS_DIR"
 
 user_units_to_restart=""
+user_session_available=$(sudo -u "$APP_USER" systemctl --user is-active --quiet 2>/dev/null && echo 1 || echo 0)
+
 for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
   [ -e "$unit" ] || continue
   unit_name="$(basename "$unit")"
@@ -123,16 +126,18 @@ for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer;
       *.service) user_units_to_restart="$user_units_to_restart $unit_name" ;;
     esac
   fi
+
+  if [ "$user_session_available" = "1" ]; then
+    sudo -u "$APP_USER" systemctl --user enable "$unit_name"
+  else
+    # create enable symlink if no session
+    ln -sf "../$unit_name" "$WANTS_DIR/$unit_name"
+  fi
 done
 
 chown -R "$APP_USER:$APP_USER" "$USER_CONFIG_DIR"
 
-for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
-  [ -e "$unit" ] || continue
-  sudo -u "$APP_USER" systemctl --user enable "$(basename "$unit")"
-done
-
-if [ -n "$user_units_to_restart" ]; then
+if [ -n "$user_units_to_restart" ] && [ "$user_session_available" = "1" ]; then
   sudo -u "$APP_USER" systemctl --user daemon-reload
   for unit in $user_units_to_restart; do
     sudo -u "$APP_USER" systemctl --user restart "$unit"
