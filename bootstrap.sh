@@ -85,25 +85,56 @@ fi
 chown -R "$APP_USER:$APP_USER" "$REPO_DIR" "$VENV_DIR"
 
 # install/update system units
-units_to_restart=""
-for unit in "$REPO_DIR"/systemd/*.service "$REPO_DIR"/systemd/*.timer; do
+system_units_to_restart=""
+for unit in "$REPO_DIR"/systemd/system/*.service "$REPO_DIR"/systemd/system/*.timer; do
   [ -e "$unit" ] || continue
   unit_name="$(basename "$unit")"
   unit_dest="/etc/systemd/system/$unit_name"
 
-  # only restart if the unit file changed
   if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
     install -m 0644 "$unit" "$unit_dest"
     case "$unit_name" in
-      *.service) units_to_restart="$units_to_restart $unit_name" ;;
+      *.service) system_units_to_restart="$system_units_to_restart $unit_name" ;;
     esac
   fi
   systemctl enable "$unit_name"
 done
 
-if [ -n "$units_to_restart" ] && [ -d /run/systemd/system ]; then
+if [ -n "$system_units_to_restart" ] && [ -d /run/systemd/system ]; then
   systemctl daemon-reload
-  for unit in $units_to_restart; do
+  for unit in $system_units_to_restart; do
     systemctl restart "$unit"
+  done
+fi
+
+# install/update user units
+USER_CONFIG_DIR="/home/$APP_USER/.config/systemd/user"
+mkdir -p "$USER_CONFIG_DIR"
+
+user_units_to_restart=""
+for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
+  [ -e "$unit" ] || continue
+  unit_name="$(basename "$unit")"
+  unit_dest="$USER_CONFIG_DIR/$unit_name"
+
+  if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
+    install -m 0644 "$unit" "$unit_dest"
+    case "$unit_name" in
+      *.service) user_units_to_restart="$user_units_to_restart $unit_name" ;;
+    esac
+  fi
+done
+
+chown -R "$APP_USER:$APP_USER" "$USER_CONFIG_DIR"
+
+for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
+  [ -e "$unit" ] || continue
+  sudo -u "$APP_USER" systemctl --user enable "$(basename "$unit")"
+done
+
+if [ -n "$user_units_to_restart" ]; then
+  sudo -u "$APP_USER" systemctl --user daemon-reload
+  for unit in $user_units_to_restart; do
+    sudo -u "$APP_USER" systemctl --user restart "$unit"
   done
 fi

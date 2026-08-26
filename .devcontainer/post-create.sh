@@ -10,13 +10,11 @@ apt -y install \
   binfmt-support \
   python3-yaml
 
-# Install rpi-image-gen
-if [ ! -d "$HOME/.local/share/rpi-image-gen" ]; then
-  echo "Installing rpi-image-gen..."
-  git clone https://github.com/raspberrypi/rpi-image-gen.git "$HOME/.local/share/rpi-image-gen"
-  cd "$HOME/.local/share/rpi-image-gen"
-  ./install_deps.sh
-  cd -
-fi
-export PATH="$HOME/.local/share/rpi-image-gen:$PATH"
-echo 'export PATH="$HOME/.local/share/rpi-image-gen:$PATH"' >> ~/.bashrc
+echo "Installing rpi-image-gen..."
+mkdir -p /opt
+git clone https://github.com/raspberrypi/rpi-image-gen.git /opt/rpi-image-gen
+cd /opt/rpi-image-gen
+git checkout v2.8.0
+./install_deps.sh
+ln -s /opt/rpi-image-gen/rpi-image-gen /usr/local/bin/rpi-image-gen
+cd -
