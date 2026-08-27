@@ -130,7 +130,7 @@ for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer;
   fi
 
   if [ "$user_session_available" = "1" ]; then
-    sudo -u "$APP_USER" systemctl --user enable "$unit_name"
+    sudo -E -u "$APP_USER" systemctl --user enable "$unit_name"
   else
     # create enable symlink if no session
     ln -sf "../$unit_name" "$WANTS_DIR/$unit_name"
@@ -140,8 +140,8 @@ done
 chown -R "$APP_USER:$APP_USER" "$USER_CONFIG_DIR"
 
 if [ -n "$user_units_to_restart" ] && [ "$user_session_available" = "1" ]; then
-  sudo -u "$APP_USER" systemctl --user daemon-reload
+  sudo -E -u "$APP_USER" systemctl --user daemon-reload
   for unit in $user_units_to_restart; do
-    sudo -u "$APP_USER" systemctl --user restart "$unit"
+    sudo -E -u "$APP_USER" systemctl --user restart "$unit"
   done
 fi
