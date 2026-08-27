@@ -17,7 +17,7 @@ echo "Root device: $ROOT_DEVICE"
 echo "Partition number: $PARTITION_NUM"
 
 echo "Expanding partition..."
-parted -s "$ROOT_DEVICE" resizepart "$PARTITION_NUM" 100%
+growpart "$ROOT_DEVICE" "$PARTITION_NUM"
 
 sleep 1
 

@@ -9,7 +9,7 @@
 mmdebstrap:
   packages:
     - git
-    - parted
+    - cloud-guest-utils
   customize-hooks:
     # configure wifi
     - |
