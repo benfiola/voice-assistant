@@ -130,7 +130,7 @@ user_units_to_restart=""
 user_units_in_repo=""
 APP_UID=$(id -u "$APP_USER")
 user_session_available=0
-[ -d "/run/user/$APP_UID/bus" ] && user_session_available=1
+[ -e "/run/user/$APP_UID/bus" ] && user_session_available=1
 
 # save and set DBUS address for user session communication
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$APP_UID/bus"
