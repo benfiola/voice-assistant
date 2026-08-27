@@ -86,9 +86,11 @@ chown -R "$APP_USER:$APP_USER" "$REPO_DIR" "$VENV_DIR"
 
 # install/update system units
 system_units_to_restart=""
+system_units_in_repo=""
 for unit in "$REPO_DIR"/systemd/system/*.service "$REPO_DIR"/systemd/system/*.timer; do
   [ -e "$unit" ] || continue
   unit_name="$(basename "$unit")"
+  system_units_in_repo="$system_units_in_repo $unit_name"
   unit_dest="/etc/systemd/system/$unit_name"
 
   if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
@@ -99,6 +101,18 @@ for unit in "$REPO_DIR"/systemd/system/*.service "$REPO_DIR"/systemd/system/*.ti
   fi
   systemctl enable "$unit_name"
 done
+
+# clean up orphaned system units
+if [ -d /etc/systemd/system ]; then
+  for unit_dest in /etc/systemd/system/va-*.service /etc/systemd/system/va-*.timer; do
+    [ -e "$unit_dest" ] || continue
+    unit_name="$(basename "$unit_dest")"
+    if ! echo "$system_units_in_repo" | grep -q "$unit_name"; then
+      systemctl disable "$unit_name" 2>/dev/null || true
+      rm -f "$unit_dest"
+    fi
+  done
+fi
 
 if [ -n "$system_units_to_restart" ] && [ -d /run/systemd/system ]; then
   systemctl daemon-reload
@@ -118,7 +132,6 @@ user_session_available=0
 [ -d "/run/user/$APP_UID/bus" ] && user_session_available=1
 
 # save and set DBUS address for user session communication
-ORIG_DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$APP_UID/bus"
 
 for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
@@ -141,7 +154,7 @@ for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer;
   fi
 done
 
-# clean up orphaned va-* prefixed units no longer in the repo
+# clean up orphaned user units
 if [ -d "$USER_CONFIG_DIR" ]; then
   for unit_dest in "$USER_CONFIG_DIR"/va-*.service "$USER_CONFIG_DIR"/va-*.timer; do
     [ -e "$unit_dest" ] || continue
@@ -165,5 +178,4 @@ if [ -n "$user_units_to_restart" ] && [ "$user_session_available" = "1" ]; then
   done
 fi
 
-# restore original DBUS address
-export DBUS_SESSION_BUS_ADDRESS="$ORIG_DBUS_SESSION_BUS_ADDRESS"
+unset DBUS_SESSION_BUS_ADDRESS
