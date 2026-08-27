@@ -1,7 +1,7 @@
 [Unit]
 Description=linux-voice-assistant + XVF3800 LED Controller
-After=linux-voice-assistant.service
-Requires=linux-voice-assistant.service
+After=va-linux-voice-assistant.service
+Requires=va-linux-voice-assistant.service
 
 [Service]
 Type=simple
