@@ -127,6 +127,7 @@ WANTS_DIR="$USER_CONFIG_DIR/default.target.wants"
 mkdir -p "$WANTS_DIR"
 
 user_units_to_restart=""
+user_units_in_repo=""
 APP_UID=$(id -u "$APP_USER")
 user_session_available=0
 [ -d "/run/user/$APP_UID/bus" ] && user_session_available=1

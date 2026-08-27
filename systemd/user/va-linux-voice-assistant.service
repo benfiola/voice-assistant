@@ -1,5 +1,5 @@
 [Unit]
-Description=linux-voice-assistant test
+Description=linux-voice-assistant
 After=pipewire.service
 Wants=pipewire.service
 
