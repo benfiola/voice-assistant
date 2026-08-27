@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eux
+set -eu
 
 REPO_DIR="/home/assistant/voice-assistant"
 LVA_DIR="$REPO_DIR/vendor/linux-voice-assistant"
