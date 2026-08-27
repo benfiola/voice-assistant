@@ -6,7 +6,7 @@ DefaultDependencies=no
 
 [Service]
 Type=oneshot
-ExecStart=/home/assistant/voice-assistant/rpi-expand-rootfs.sh
+ExecStart=/home/assistant/voice-assistant/expand-rootfs.sh
 RemainAfterExit=yes
 StandardOutput=journal
 StandardError=journal

@@ -9,8 +9,7 @@ WorkingDirectory=/home/assistant/voice-assistant/vendor/linux-voice-assistant
 Environment=PATH=/home/assistant/.venv/bin:/usr/bin:/bin
 Environment=PREFERENCES_FILE=/home/assistant/preferences.json
 Environment=CLIENT_NAME=%H
-ExecStartPre=/home/assistant/.venv/bin/python3 /home/assistant/voice-assistant/vendor/respeaker-xvf3800/python_control/xvf_host.py REBOOT --values 1
-ExecStartPre=/bin/sleep 3
+ExecStartPre=/home/assistant/voice-assistant/linux-voice-assistant-pre.sh
 ExecStart=/home/assistant/voice-assistant/vendor/linux-voice-assistant/docker-entrypoint.sh
 Restart=always
 RestartSec=5
