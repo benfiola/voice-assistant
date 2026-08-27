@@ -137,6 +137,7 @@ export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$APP_UID/bus"
 for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
   [ -e "$unit" ] || continue
   unit_name="$(basename "$unit")"
+  user_units_in_repo="$user_units_in_repo $unit_name"
   unit_dest="$USER_CONFIG_DIR/$unit_name"
 
   if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
