@@ -86,11 +86,9 @@ chown -R "$APP_USER:$APP_USER" "$REPO_DIR" "$VENV_DIR"
 
 # install/update system units
 system_units_to_restart=""
-system_units_in_repo=""
 for unit in "$REPO_DIR"/systemd/system/*.service "$REPO_DIR"/systemd/system/*.timer; do
   [ -e "$unit" ] || continue
   unit_name="$(basename "$unit")"
-  system_units_in_repo="$system_units_in_repo $unit_name"
   unit_dest="/etc/systemd/system/$unit_name"
 
   if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
@@ -101,18 +99,6 @@ for unit in "$REPO_DIR"/systemd/system/*.service "$REPO_DIR"/systemd/system/*.ti
   fi
   systemctl enable "$unit_name"
 done
-
-# clean up orphaned va-* prefixed units no longer in the repo
-if [ -d /etc/systemd/system ]; then
-  for unit_dest in /etc/systemd/system/va-*.service /etc/systemd/system/va-*.timer; do
-    [ -e "$unit_dest" ] || continue
-    unit_name="$(basename "$unit_dest")"
-    if ! echo "$system_units_in_repo" | grep -q "$unit_name"; then
-      systemctl disable "$unit_name" 2>/dev/null || true
-      rm -f "$unit_dest"
-    fi
-  done
-fi
 
 if [ -n "$system_units_to_restart" ] && [ -d /run/systemd/system ]; then
   systemctl daemon-reload
@@ -127,13 +113,13 @@ WANTS_DIR="$USER_CONFIG_DIR/default.target.wants"
 mkdir -p "$WANTS_DIR"
 
 user_units_to_restart=""
-user_units_in_repo=""
-user_session_available=$(sudo -u "$APP_USER" systemctl --user is-active --quiet 2>/dev/null && echo 1 || echo 0)
+APP_UID=$(id -u "$APP_USER")
+user_session_available=0
+[ -d "/run/user/$APP_UID" ] && user_session_available=1
 
 for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer; do
   [ -e "$unit" ] || continue
   unit_name="$(basename "$unit")"
-  user_units_in_repo="$user_units_in_repo $unit_name"
   unit_dest="$USER_CONFIG_DIR/$unit_name"
 
   if ! cmp -s "$unit" "$unit_dest" 2>/dev/null; then
@@ -150,21 +136,6 @@ for unit in "$REPO_DIR"/systemd/user/*.service "$REPO_DIR"/systemd/user/*.timer;
     ln -sf "../$unit_name" "$WANTS_DIR/$unit_name"
   fi
 done
-
-# clean up orphaned va-* prefixed units no longer in the repo
-if [ -d "$USER_CONFIG_DIR" ]; then
-  for unit_dest in "$USER_CONFIG_DIR"/va-*.service "$USER_CONFIG_DIR"/va-*.timer; do
-    [ -e "$unit_dest" ] || continue
-    unit_name="$(basename "$unit_dest")"
-    if ! echo "$user_units_in_repo" | grep -q "$unit_name"; then
-      rm -f "$unit_dest"
-      rm -f "$WANTS_DIR/$unit_name"
-      if [ "$user_session_available" = "1" ]; then
-        sudo -u "$APP_USER" systemctl --user disable "$unit_name" 2>/dev/null || true
-      fi
-    fi
-  done
-fi
 
 chown -R "$APP_USER:$APP_USER" "$USER_CONFIG_DIR"
 
