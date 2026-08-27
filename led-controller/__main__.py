@@ -36,7 +36,7 @@ def set_led_effect(effect: int) -> None:
     """
     try:
         subprocess.run(
-            [sys.executable, XVF_HOST, "LED_EFFECT", str(effect)],
+            [sys.executable, XVF_HOST, "LED_EFFECT", "--values", str(effect)],
             check=True,
             capture_output=True,
             timeout=2,
